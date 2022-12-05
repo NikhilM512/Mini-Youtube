@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Youtube App-1</title>
+    <style>
+        *{
+            margin:0px;
+            padding: 0px;
+            box-sizing: border-box;
+        }
+        body{
+            width: 100%;
+            /* border: 1px solid red; */
+            /* position: fixed; */
+        }
+        #navbar{
+            display: flex;
+            align-items: center;
+            /* border: 2px solid red; */
+            width: 100%;
+            height:77px;
+        }
+        #navbar>img{
+            display: block;
+            width: 150px;
+            height: 100%;
+            margin-left: 50px;
+        }
+        #navbar>input{
+            height: 33px;
+            width: 555px;
+            margin-left: 333px;
+            padding-left: 11px;
+        }
+        #navbar>button{
+            height: 33px;
+            width: 77px;
+            margin-left: 4px;
+        }
+        /* .thumbnails{
+            width: 480px;
+            height: 360px;
+        } */
+        #container{
+            width: 100%;
+            height: auto;
+            margin-top: 5%;
+            display: grid;
+            grid-template-columns: repeat(4,22%);
+            grid-template-rows: auto;
+            gap: 4%;
+            padding: 2%;
+            /* position: fixed; */
+        }
+        #navbar>div{
+            display: flex;
+            align-items: center;
+            margin-left: 160px;
+            margin-top: -5px;
+        }
+        #navbar>div>img{
+            width: 66px;
+            height: 55px;
+            margin-top: 7px;
+        }
+        #navbar>div>button{
+            width: 100px;
+            height: 33px;
+            margin-top: 5px; 
+        }
+        .box{
+            width: 100%;
+            /* height: 500px; */
+            /* border: 3px solid green; */
+            /* display: flex;
+            flex-wrap: wrap; */
+            /* position:sticky; */
+        }
+        .box>iframe{
+            width: 100%;
+        }
+        #filterChannelId,#filterTitle,#filterType{
+            border: 1px solid #ccc;
+            margin-bottom: 22px;
+            margin-top:22px ;
+            height: 33px;
+            width: 200px;
+            border-radius: 17px;
+            padding-left: 11px;
+            color: rgb(96, 95, 95);
+            font-weight: bold;
+            margin: 11px 44px 11px 44px ;
+        }
+        .box>h4{
+            display: flex;
+            flex-wrap:nowrap;
+            /* border: 1px solid red; */
+            /* color: #ccc; */
+        }
+    </style>
+</head>
+<body>
+    <hr>
+    <div id="navbar">
+    <!-- <h1>YouTube</h1> -->
+    <img onclick="goToHomePage()" src="https://exchange4media.gumlet.io/news-photo/117105-you.png?format=webp&w=610&dpr=1.3" alt="Yt_Logo">
+    <input type="text" name="searchBox" id="query" placeholder="Search">
+    <button onclick="searchVideo()">Search</button>
+    <div>
+        <img src="https://scai.org/sites/default/files/styles/image_home/public/2020-08/Whats%20new%20icon.jpg?itok=fb-pdXbH" alt="bell-Icon">
+        <button><a href="">Log-In</a></button>
+    </div>
+    </div>
+    <hr>
+    <select name="filterByType" id="filterType" onchange="filterType()">
+        <option value="">Filter By Video Type</option>
+        <option value="movie">MOVIES</option>
+        <option value="song">MUSIC</option>
+        <option value="comedy">COMEDY</option>
+        <option value="trailer">TRAILERS</option>
+        <option value="game">GAMING</option>
+        <option value="live">LIVE</option>
+    </select>
+    <input type="text" id="filterChannelId" onkeypress="filterChannelId()" placeholder="Filer By Channel Id">
+    <input type="text" id="filterTitle" onkeypress="filterTitle()" placeholder="Filer By Channel Title">
+    
+    <hr>
+    <div id="container">
+        
+    </div>
+</body>
+</html>
+<script>
+    let container=document.getElementById("container");
+    let query=document.getElementById("query");
+    let youtube_api_key="AIzaSyDtE8p1RtpXKKAaRSbtnxmYYXyMP6Pt7iM";
+    let data;
+
+    let goToHomePage=()=>{
+        window.location.href="index.html"
+    }
+    
+    let searchVideo=async()=>{
+        let url=`https://www.googleapis.com/youtube/v3/search?q=${query.value}&key=${youtube_api_key}&part=snippet&maxResults=50`;
+      try {
+        let res=await fetch(url);
+        let {items}=await res.json();
+        console.log(items);
+        let required_Arr=items;
+        data=required_Arr;
+        appendData(required_Arr);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    let appendData=(data)=>{
+        console.log(data)
+        container.innerHTML=null;
+
+        data.forEach(({snippet:{thumbnails:{high:{url}}},snippet:{title},id:{videoId}}) => {            
+    //    console.log(url);
+
+        let box=document.createElement("div");
+        box.setAttribute("class","box")
+
+        let thumbnail=document.createElement("img");
+        thumbnail.src=url;
+        thumbnail.setAttribute("class","thumbnails")
+        thumbnail.style.width="100%";
+        thumbnail.style.height="70%";
+
+        let name=document.createElement("h4");
+        name.innerText=title;
+
+        let obj={
+            id:videoId,
+            name:title
+        }
+        
+        box.append(thumbnail,name);
+        box.addEventListener("click",()=>{
+            playVideo(obj)
+        });
+        container.append(box);
+        });
+        
+    }
+
+
+    let playVideo=(data)=>{
+     localStorage.setItem("videoData",JSON.stringify(data));
+     window.location.href='videoPage.html'
+    }
+
+
+     let trendingVideos=async()=>{
+        // let url="https://www.googleapis.com/youtube/v3/search?key=AIzaSyDtE8p1RtpXKKAaRSbtnxmYYXyMP6Pt7iM&part=snippet&maxResults=50&chart=trending&regionCode=IN";
+         let url="https://youtube.googleapis.com/youtube/v3/videos?part=snippet&maxResults=50&chart=mostPopular&regionCode=IN&key=AIzaSyDtE8p1RtpXKKAaRSbtnxmYYXyMP6Pt7iM"
+        try {
+            let res=await fetch(url);
+            let {items}=await res.json();
+            dataObj={items};
+            data=dataObj.items;
+            dataArr=data;
+            appendTrendingData(dataArr);
+        } catch (error) {
+            console.log(error);
+        }
+     }
+                        
+     trendingVideos();
+
+     let appendTrendingData=(data)=>{
+        container.innerHTML=null;
+        console.log(data)
+        data.forEach(({snippet:{title},id:{videoId}})=>{
+                //   console.log(videoId,title)
+            let box=document.createElement("div");
+            box.setAttribute("class","box")
+
+            let iframe=document.createElement("iframe");
+            iframe.src=`https://www.youtube.com/embed/${videoId}`
+            iframe.width="100%";
+            iframe.width="100%";
+            iframe.allow="fullscreen";
+
+            let name=document.createElement("h4");
+            name.innerText=title;
+            // if(name){
+            //         console.log(typeof(name))
+            // }
+
+            box.append(iframe,name);
+            box.style.width="100%"
+            container.append(box);
+            container.style.display="grid";
+            container.style.gridTemplateColumns="repeat(4,22%)"
+            container.style.gap="4%"
+        });     
+     };
+
+     let filterChannelId=()=>{
+        let filteredId=document.getElementById("filterChannelId").value;
+        let copy_data=[...data];
+        copy_data=copy_data.filter((el)=>{
+            return el.includes(filteredId);
+        })
+        appendData(copy_data)
+     }
+     let filterTitle=()=>{
+        let filteredTitle=document.getElementById("filterTitle").value;
+        let copy_data=[...data];
+        console.log(copy_data,filteredTitle)
+        copy_data=copy_data.filter((el)=>{
+            return el.snippet.title.includes(filteredTitle);
+        })
+        appendData(copy_data)
+     }
+
+     let filterType=()=>{
+        let query=document.getElementById("filterType").value;
+        console.log(query);
+        // let descriptn;
+        let copy_data=[...data];
+        copy_data=copy_data.filter((el)=>{
+            let descriptn=el.snippet.description.toLowerCase();
+            return descriptn.includes(query.toLowerCase());
+        });
+        appendData(copy_data);
+     }
+</script>
